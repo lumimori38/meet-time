@@ -710,10 +710,11 @@ function askName(){
   inp.onkeydown = e => { if(e.key === 'Enter') done(); };
   setTimeout(() => inp.focus(), 250);
 }
+function evText(){ return '[' + NAME + '] ' + (S.ev ? S.ev.meta.name : '') + '\n' + shareLink(); }
 function shareLink(){ return location.href.split('#')[0] + '#' + (S.demo ? 'demo-' : '') + 'e-' + S.id; }
 function openShare(fresh){
   openSheet('<h3 class="h">' + (fresh ? '약속을 만들었어요!' : '친구들에게 링크를 보내요') + '</h3><p>링크를 연 사람이 되는 시간을 칠하면<br>모두 되는 시간이 바로 보여요</p><div class="link" id="lk">' + esc(shareLink()) + '</div><button class="btn" id="cp">링크 복사</button>' + (fresh ? '<button class="btn sec" id="c0">내 시간 칠하러 가기</button>' : '<button class="btn sec" id="c0">닫기</button>'));
-  sh('#cp').onclick = e => copy(shareLink(), e.currentTarget);
+  sh('#cp').onclick = e => copy(evText(), e.currentTarget);
   sh('#c0').onclick = () => { closeSheet(); if(S.tab !== 'mine') go('e-' + S.id); else if(fresh && !S.name) setTimeout(askName, 50); };
 }
 function showCell(i){
@@ -751,7 +752,7 @@ function shareTool(){
     + item('tool', NAME, '모임 시간 정하는 툴', url)
     + (ev ? item('ev', '이 약속 링크', ev.name, shareLink()) : '')
     + '<a class="btn sec" href="' + esc(tw) + '" target="_blank" rel="noopener" style="margin-top:6px">트위터로 ' + NAME + ' 공유하기</a>', true);
-  document.querySelectorAll('.sh .lk').forEach(b => b.onclick = () => copyLink(b.dataset.k === 'tool' ? url : shareLink(), b));
+  document.querySelectorAll('.sh .lk').forEach(b => b.onclick = () => copyLink(b.dataset.k === 'tool' ? url : evText(), b));
 }
 async function copyLink(text, b){
   const ok = await writeClip(text), c = b.querySelector('.cpy');
