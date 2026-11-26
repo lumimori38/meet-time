@@ -205,7 +205,16 @@ a.btn{display:grid;place-items:center;text-decoration:none}
 <div id="app"></div>
 <script>
 {
-const FIREBASE_CONFIG = null;
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCdjA56dJzneANZ90f8t5qn7n2Bu0SDBZA",
+  authDomain: "meet-time-4fa8b.firebaseapp.com",
+  databaseURL: "https://meet-time-4fa8b-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "meet-time-4fa8b",
+  storageBucket: "meet-time-4fa8b.firebasestorage.app",
+  messagingSenderId: "499988522874",
+  appId: "1:499988522874:web:49815e11414ef5ecb7d8c3",
+  measurementId: "G-VC85WY002S"
+};
 
 const NAME = '언제 볼까?';
 const HOME = 'https://lumimori38.github.io/';
@@ -254,6 +263,7 @@ async function fireStore(cfg){
   const B = 'https://www.gstatic.com/firebasejs/10.12.2/';
   const [A, U, D] = await Promise.all([import(B + 'firebase-app.js'), import(B + 'firebase-auth.js'), import(B + 'firebase-database.js')]);
   const fa = A.initializeApp(cfg), auth = U.getAuth(fa), db = D.getDatabase(fa);
+  import(B + 'firebase-analytics.js').then(G => G.isSupported().then(ok => { if(ok) G.getAnalytics(fa); })).catch(() => {});
   const uid = await new Promise((ok, no) => { U.onAuthStateChanged(auth, u => { if(u) ok(u.uid); }); U.signInAnonymously(auth).catch(no); });
   const r = p => D.ref(db, p);
   return {
@@ -786,8 +796,12 @@ function openMenu(){
 function closeMenu(){ document.querySelectorAll('.fdim,.fmenu').forEach(e => e.remove()); }
 
 (async () => {
-  try{ S.live = FIREBASE_CONFIG ? await fireStore(FIREBASE_CONFIG) : localStore(); }
-  catch(e){ S.live = localStore(); }
+  try{ S.live = FIREBASE_CONFIG ? await Promise.race([fireStore(FIREBASE_CONFIG), new Promise((_, no) => setTimeout(() => no(new Error('timeout')), 12000))]) : localStore(); }
+  catch(e){
+    app.innerHTML = '<div class="scr"><div class="load"><div><b>연결하지 못했어요</b><br>인터넷 연결을 확인하고<br>다시 시도해 주세요<br><br><button class="btn sm" id="rt" style="width:180px">다시 시도</button></div></div>' + footer(false) + '</div>';
+    app.querySelector('#rt').onclick = () => location.reload();
+    return;
+  }
   S.store = S.live;
   addEventListener('hashchange', route);
   route();
