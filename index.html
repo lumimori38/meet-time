@@ -173,6 +173,14 @@ a.btn{display:grid;place-items:center;text-decoration:none}
 .sh .btn+.btn{margin-top:8px}
 .sh .row2{display:flex;gap:8px}.sh .row2 .btn{margin-top:0}
 .sh .fld{margin-bottom:12px}
+.shx{position:absolute;top:10px;right:10px;color:var(--sub)}
+.sh h3+p{margin-bottom:14px}
+.lkl{display:flex;align-items:baseline;gap:8px;margin:4px 0 6px;font-size:14px}
+.lkl span{color:var(--sub);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lk{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;border:0;border-radius:14px;background:var(--card);padding:0 14px;margin-bottom:14px;text-align:left}
+.lk .u{flex:1;font-size:14px;color:var(--pri);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lk .cpy{flex:none;font-size:12px;font-weight:700;color:var(--sub);background:var(--bg);border-radius:99px;padding:5px 10px}
+.lk.done .cpy{background:var(--pri);color:#fff}
 .link{display:block;background:var(--card);border-radius:14px;padding:14px;font-size:14px;color:var(--pri);font-weight:500;word-break:break-all;margin-bottom:12px;-webkit-user-select:all;user-select:all}
 .grp{margin-bottom:14px}
 .grp>b{display:block;font-size:13px;margin-bottom:6px}
@@ -240,6 +248,7 @@ const ico = {
   next:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
   share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg>',
   del:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   pen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg>'
 };
 const footer = full => '<footer class="lumi-ft">쓸데없이 진심인 B급 콘텐츠<br>' + (full ? NAME + ' × ' : '') + '<a href="' + HOME + '">©루미 오락실</a> · lumimori38</footer>';
@@ -343,10 +352,9 @@ function renderHome(){
     + '<div class="lh h">내 약속<span>' + (l.length ? l.length + '개' : '') + '</span></div>'
     + '<div class="list">' + (l.length ? l.map(x => '<div class="item"><button class="go" data-id="' + esc(x.id) + '"><b>' + esc(x.name) + '</b><small><span class="tag' + (x.owner ? '' : ' y') + '">' + (x.owner ? '내가 만든' : '참여') + '</span>' + esc(fdate(x.dates[0])) + (x.dates.length > 1 ? ' 외 ' + (x.dates.length - 1) + '일' : '') + '</small></button>' + (x.owner ? '<button class="ib del" data-id="' + esc(x.id) + '" aria-label="삭제">' + ico.del + '</button>' : '') + '</div>').join('')
       : '<div class="empty"><b>아직 약속이 없어요</b>새 약속을 만들거나<br>받은 링크를 열어 보세요</div>') + '</div>'
-    + '<div class="row2">' + (S.demo ? '' : '<button class="btn ln sm" id="db">예시로 둘러보기</button>') + '<button class="btn ln sm" id="tsh">친구에게 공유하기</button></div>'
+    + '<button class="btn ln sm" id="tsh" style="margin-top:10px">친구에게 공유하기</button>'
     + footer(false) + '</div>');
   app.querySelector('#nb').onclick = () => go('new');
-  const db = app.querySelector('#db'); if(db) db.onclick = () => { location.hash = 'demo'; };
   app.querySelector('#tsh').onclick = shareTool;
   app.querySelectorAll('.go').forEach(b => b.onclick = () => go('e-' + b.dataset.id));
   app.querySelectorAll('.del').forEach(b => b.onclick = () => askDelete(b.dataset.id, l.find(x => x.id === b.dataset.id).name));
@@ -560,7 +568,7 @@ function drawGrid(A){
       }else h += '<div class="c' + (hr ? ' hr' : '') + (S.mine[i] ? ' on' : '') + '" data-i="' + i + '"></div>';
     }
   }
-  h += '</div><div class="gr" style="--n:' + n + ';--rh:18px"><div class="t"><span>' + ftime(m, R) + '</span></div></div><div class="gend"></div><div class="cta"><b>다른 모임 시간도 정해 볼까요?</b><div class="row2"><button class="btn sm" id="cn">새 약속 만들기</button><button class="btn sm sec" id="ct">언제 볼까? 공유</button></div></div>' + (heat ? footer(true) : '<div style="height:20px"></div>') + '</div>';
+  h += '</div><div class="gr" style="--n:' + n + ';--rh:18px"><div class="t"><span>' + ftime(m, R) + '</span></div></div><div class="gend"></div><div class="cta"><b>다른 모임 시간도 정해 볼까요?</b><div class="row2"><button class="btn sm" id="cn">새 약속 만들기</button><button class="btn sm sec" id="ct">공유하기</button></div></div>' + (heat ? footer(true) : '<div style="height:20px"></div>') + '</div>';
   gd.innerHTML = h;
   const pp = gd.querySelector('#pp'), pn = gd.querySelector('#pn');
   if(pp) pp.onclick = () => { S.page--; drawGrid(analyze()); };
@@ -675,10 +683,11 @@ function queueSave(ms){
 
 let sheetAt = 0;
 const sh = s => document.querySelector('.sh ' + s);
-function openSheet(html){
+function openSheet(html, x){
   closeSheet();
   const dim = document.createElement('div'); dim.className = 'dim';
-  const box = document.createElement('div'); box.className = 'sh'; box.innerHTML = html;
+  const box = document.createElement('div'); box.className = 'sh'; box.innerHTML = (x ? '<button class="ib shx" aria-label="닫기">' + ico.x + '</button>' : '') + html;
+  if(x) box.querySelector('.shx').onclick = closeSheet;
   document.body.append(dim, box);
   sheetAt = Date.now();
   dim.onclick = () => { if(Date.now() - sheetAt > 450) closeSheet(); };
@@ -735,17 +744,31 @@ function resultText(A){
   return blocks.join('\n\n');
 }
 function shareTool(){
-  const url = toolUrl();
+  const url = toolUrl(), ev = S.ev && S.id && /^#(demo-)?e-/.test(location.hash) ? S.ev.meta : null;
   const tw = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent('[' + NAME + '] 링크 하나로 모두 되는 시간 찾기\n' + TAGS + '\n' + url);
-  openSheet('<h3 class="h">' + NAME + ' 공유하기</h3><p>모임 시간 정할 일이 있는 친구에게<br>알려 주세요</p><div class="link">' + esc(url) + '</div><div class="row2"><button class="btn" id="cp">링크 복사하기</button><a class="btn sec" id="tw" href="' + esc(tw) + '" target="_blank" rel="noopener">트위터 공유하기</a></div><button class="btn ln" id="c0" style="margin-top:8px">닫기</button>');
-  sh('#cp').onclick = e => copy(url, e.currentTarget);
-  sh('#c0').onclick = closeSheet;
+  const item = (k, label, sub, link) => '<div class="lkl"><b>' + label + '</b>' + (sub ? '<span>' + esc(sub) + '</span>' : '') + '</div><button class="lk" data-k="' + k + '"><span class="u">' + esc(link) + '</span><span class="cpy">복사</span></button>';
+  openSheet('<h3 class="h">공유하기</h3><p>링크를 누르면 복사돼요</p>'
+    + item('tool', NAME, '모임 시간 정하는 툴', url)
+    + (ev ? item('ev', '이 약속 링크', ev.name, shareLink()) : '')
+    + '<a class="btn sec" href="' + esc(tw) + '" target="_blank" rel="noopener" style="margin-top:6px">트위터로 ' + NAME + ' 공유하기</a>', true);
+  document.querySelectorAll('.sh .lk').forEach(b => b.onclick = () => copyLink(b.dataset.k === 'tool' ? url : shareLink(), b));
+}
+async function copyLink(text, b){
+  const ok = await writeClip(text), c = b.querySelector('.cpy');
+  c.textContent = ok ? '복사 완료!' : '꾹 눌러 복사';
+  b.classList.toggle('done', ok);
+  if(ok) bubble(b, '링크가 복사됐어요!');
+  setTimeout(() => { c.textContent = '복사'; b.classList.remove('done'); }, 1500);
 }
 
-async function copy(text, btn, msg){
+async function writeClip(text){
   let ok = false;
   try{ await navigator.clipboard.writeText(text); ok = true; }catch(e){}
   if(!ok){ const t = document.createElement('textarea'); t.value = text; t.setAttribute('readonly', ''); t.style.cssText = 'position:fixed;top:0;opacity:0'; document.body.append(t); t.select(); t.setSelectionRange(0, text.length); try{ ok = document.execCommand('copy'); }catch(e){} t.remove(); }
+  return ok;
+}
+async function copy(text, btn, msg){
+  const ok = await writeClip(text);
   const old = btn.dataset.l || btn.textContent; btn.dataset.l = old;
   btn.textContent = ok ? '복사 완료!' : '복사가 안 됐어요';
   if(ok) bubble(btn, msg || '링크가 복사됐어요!');
