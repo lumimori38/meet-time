@@ -93,6 +93,12 @@ button{cursor:pointer}
 .dy:disabled{color:var(--clh);cursor:default}
 .calf{flex:none;text-align:center;font-size:12px;color:var(--sub);height:18px}
 .calf b{color:var(--pri)}
+.fld.err,.fld.err:focus,.sel.err{border-color:var(--sun)}
+.fld.err::placeholder{color:var(--sun);opacity:1}
+.cal.err{box-shadow:inset 0 0 0 1.5px var(--sun)}
+.cal.err .calf{color:var(--sun);font-weight:700}
+.shk{animation:shk .36s}
+@keyframes shk{20%{transform:translateX(-6px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
 .trow{flex:none;display:flex;align-items:center;gap:8px;height:48px}
 .trow label{width:36px;font-weight:700;font-size:14px}
 .sel{flex:1;height:44px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);padding:0 10px;font-size:16px;appearance:none;-webkit-appearance:none;text-align:center;text-align-last:center}
@@ -392,13 +398,25 @@ function renderNew(){
     $('#pm').disabled = c.y === t.getFullYear() && c.m === t.getMonth();
     $('#cf').innerHTML = c.sel.size ? '<b>' + c.sel.size + '일</b> 골랐어요 · 최대 14일' : '후보 날짜를 모두 눌러 주세요 · 최대 14일';
     sg();
-    const ok = c.name.trim() && c.sel.size && c.end > c.start;
-    $('#mk').disabled = !ok;
-    $('#mk').textContent = !c.name.trim() ? '약속 이름을 적어 주세요' : !c.sel.size ? '날짜를 골라 주세요' : c.end <= c.start ? '끝 시간을 확인해 주세요' : '약속 만들기';
+    $('#mk').textContent = '약속 만들기';
+  };
+  const NM_PH = '약속 이름 (예: 연말 모임)';
+  const shake = el => { el.classList.remove('shk'); void el.offsetWidth; el.classList.add('shk'); };
+  const clearNm = () => { const f = $('#nm'); f.classList.remove('err'); f.placeholder = NM_PH; };
+  const clearCal = () => $('.cal').classList.remove('err');
+  const clearTime = () => { $('#st').classList.remove('err'); $('#en').classList.remove('err'); };
+  const check = () => {
+    const noName = !c.name.trim(), noDate = !c.sel.size, badTime = c.end <= c.start;
+    if(noDate){ const cal = $('.cal'); cal.classList.add('err'); $('#cf').textContent = '후보 날짜를 골라 주세요 · 최대 14일'; shake(cal); }
+    if(badTime){ $('#st').classList.add('err'); $('#en').classList.add('err'); shake($('.trow')); }
+    if(noName){ const f = $('#nm'); f.value = ''; c.name = ''; f.classList.add('err'); f.placeholder = '약속 이름을 적어 주세요'; shake(f); f.focus(); f.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+    else if(noDate) $('.cal').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    else if(badTime) bubble($('#en'), '끝 시간을 시작보다 늦게 골라 주세요');
+    return !(noName || noDate || badTime);
   };
   const sg = () => app.querySelectorAll('#sg button').forEach(b => b.classList.toggle('on', +b.dataset.v === c.step));
   $('#bk').onclick = () => go('');
-  $('#nm').oninput = e => { c.name = e.target.value; draw(); };
+  $('#nm').oninput = e => { c.name = e.target.value; clearNm(); };
   $('#nm').onkeydown = e => { if(e.key === 'Enter') e.target.blur(); };
   $('#pm').onclick = () => { if(--c.m < 0){ c.m = 11; c.y--; } draw(); };
   $('#nx').onclick = () => { if(++c.m > 11){ c.m = 0; c.y++; } draw(); };
@@ -408,13 +426,15 @@ function renderNew(){
     if(c.sel.has(k)) c.sel.delete(k);
     else if(c.sel.size >= 14){ bubble(b, '최대 14일까지 고를 수 있어요'); return; }
     else c.sel.add(k);
-    draw();
+    clearCal(); draw();
   };
-  $('#st').onchange = e => { c.start = +e.target.value; draw(); };
-  $('#en').onchange = e => { c.end = +e.target.value; draw(); };
+  $('#st').onchange = e => { c.start = +e.target.value; clearTime(); draw(); };
+  $('#en').onchange = e => { c.end = +e.target.value; clearTime(); draw(); };
   $('#sg').onclick = e => { const b = e.target.closest('button'); if(b){ c.step = +b.dataset.v; sg(); } };
   $('#mk').onclick = async e => {
-    const btn = e.currentTarget; btn.disabled = true; btn.textContent = '만드는 중…';
+    const btn = e.currentTarget;
+    if(!check()) return;
+    btn.disabled = true; btn.textContent = '만드는 중…';
     const meta = { name: c.name.trim().slice(0, 30), dates: [...c.sel].sort(), start: c.start, end: c.end, step: c.step, owner: S.store.uid, created: Date.now() };
     try{
       const id = await S.store.create(meta);
